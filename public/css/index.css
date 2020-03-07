@@ -1,0 +1,58 @@
+* {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.main{
+    position: relative;
+    top: 100px;
+    width: 600px;
+    margin: 0 auto;
+    background-color: WhiteSmoke;
+    box-shadow: 0 1px 3px 1px gray;
+}
+h1 {
+    text-align: center;
+    border-bottom: 1px solid black;
+}
+th {
+    
+    border-right: 1px solid black;
+    border-bottom: 1px solid black;
+    width: 150px;
+    text-align: center;
+    background-color: skyblue;
+}
+table {
+    border-top: 1px solid black;
+    border-left: 1px solid black;
+}
+td {
+    text-align: center;
+    border-right: 1px solid black;
+    border-bottom: 1px solid black;
+    
+}
+a {
+    text-decoration: none;
+    color: green;
+}
+.addBox {
+    text-align: center;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+.addBox button {
+    width: 50px;
+    
+}
+.numBox {
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+    border-bottom: 1px solid black;
+}
+.bottom {
+    height: 8px;
+    background-color: skyblue;
+}

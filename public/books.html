@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>图书管理系统</title>
+    <script src="./js/vue.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <link rel="stylesheet" href="./css/index.css">
+</head>
+<body>
+    <div id="vm" class="main">
+        <h1>图书管理系统</h1>
+        <div class="numBox">
+            <span>图书总数：</span>
+            <span>{{books.length}}</span>
+        </div>
+        <div class="addBox">
+            <label for="id">编号：</label>
+            <input type="text" id="id" v-model.lazy='id' :disabled='flag'>
+            <span>&nbsp;&nbsp;&nbsp;&nbsp;</span>
+            <label for="name">名称：</label>
+            <input type="text" id="name" v-model='name'>
+            <button @click='handle' :disabled='ifRe'>提交</button>
+        </div>
+        <table border="0" cellspacing="0" cellpadding="0">
+            <thead>
+                <tr>
+                    <th>编号</th>
+                    <th>名称</th>
+                    <th>时间</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr :key='item.id' v-for='item in books'>
+                    <td>{{item.id}}</td>
+                    <td>{{item.name}}</td>
+                    <td>{{item.date | format('yyyy-MM-dd hh:mm:ss')}}</td>
+                    <td>
+                        <a href="" @click.prevent='toEdit(item.id)'>修改</a>
+                        <span>|</span>
+                        <a href="" @click.prevent='toDelete(item.id)'>删除</a>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+        <div class="bottom"></div>
+    </div>
+    <script>
+        // import axios from 'axios';
+        axios.defaults.baseURL = 'http://localhost:3000/';
+        Vue.filter('format',function(val,arg){
+            var time = new Date(parseInt(val));
+            var year = time.getFullYear()+'年';
+            var month = time.getMonth()+1+'月';
+            var date = time.getDate()+'日';
+            return [year,month,date].join('-');
+        });
+        var vm = new Vue({
+            el: '#vm',
+            data: {
+                id: '',
+                name: '',
+                flag: false,
+                ifRe: true,
+                books: []
+                
+            },
+            methods: {
+                handle: function(){
+                    var date = new Date().getTime();
+                    //判断是否为编辑图书
+                    if(this.flag == true){
+                        axios.put('books/' + this.id,{
+                            name: this.name,
+                            date: date
+                        }).then((data)=>{
+                            if(data.status == 200){
+                                this.books = data.data;
+                            }else{
+                                alert('error')
+                                return;
+                            }
+                            this.id = '';
+                            this.name = '';
+                            this.flag = false;
+                        });
+                        
+                    }
+                    //添加图书
+                    if(this.books[this.id - 1]){
+                        return;
+                    }else{
+                        if(this.id == '' || this.name == ''){
+                            return;
+                        }
+                        var id = this.id;
+                        var name = this.name;
+                        //修改后端数据
+                        axios({
+                            method: 'post',
+                            url: 'books',
+                            data: {
+                                id: id,
+                                name: name,
+                                date: date.toString()
+                            }
+                        }).then((data)=>{
+                            if(data.status != 200){
+                                alert('error!');
+                            }
+                            //更新页面
+                            this.books = data.data;
+                        });
+                        
+                    }
+                    this.id = '';
+                    this.name = '';
+                    this.flag = false;
+                },
+                toEdit: function(id){
+                    this.flag = true;
+                    axios.get('books/' + id).then((data)=>{
+                        this.id = data.data.id;
+                        this.name = data.data.name;
+                    });
+                },
+                toDelete: function(id){
+                    axios.delete('books/' + id).then((data)=>{
+                        if(data.status == 200){
+                            this.books = data.data;
+                        }else{
+                            alert('error!');
+                        }
+                    });
+                }
+            },
+            //mounted不需要watch
+            mounted: function(){
+                axios.get('books').then((data)=>{
+                    this.books = data.data;
+                });
+            },
+            watch: {
+                name: function(){
+                    axios.get('books/book/' + this.name).then((data)=>{
+                        if(data.data == false){
+                            this.ifRe = false;
+                        }else{
+                            this.ifRe = true;
+                        }
+                    });
+                },
+                id: function(){
+                    if(this.flag == false){
+                        var index = this.books.findIndex((item)=>{
+                            return item.id == this.id;
+                        });
+                        if(index != -1){
+                            alert('id已存在');
+                            this.id = '';
+                        }
+                    }
+                }
+            }
+
+        });
+        
+    </script>
+</body>
+</html>
